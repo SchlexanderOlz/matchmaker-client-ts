@@ -2,7 +2,11 @@ import { sleep } from "bun";
 import EventEmitter from "events";
 import { io, type Socket } from "socket.io-client";
 import * as ping from "ping";
-import { GameServerWriteClient } from "./gameserver-client";
+import {
+  GameServerClientDefault,
+  GameServerWriteClient,
+  type GameServerClientBuilder,
+} from "./gameserver-client";
 
 export interface GameMode {
   name: string;
@@ -22,12 +26,13 @@ export interface Match {
   write: string;
 }
 
-export class MatchMaker extends EventEmitter {
+export class MatchMaker<C extends GameServerWriteClient> extends EventEmitter {
   url: string;
   private socket: Socket;
   private ready: boolean = false;
+  private readonly clientBuilder: GameServerClientBuilder<C>;
 
-  constructor(url: string) {
+  constructor(url: string, clientBuilder?: GameServerClientBuilder<C>) {
     super();
     this.url = url.at(-1) === "/" ? url.slice(0, -1) : url;
     this.socket = io(this.url + "/match", {
@@ -35,6 +40,10 @@ export class MatchMaker extends EventEmitter {
       reconnection: true,
       forceNew: true,
     });
+
+    this.clientBuilder =
+      clientBuilder ??
+      (new GameServerClientDefault() as GameServerClientBuilder<C>);
 
     this.socket.on("connect_error", (err) => {
       throw err;
@@ -77,7 +86,7 @@ export class MatchMaker extends EventEmitter {
 
   private onMatch(data: any) {
     const match = data as Match;
-    this.emit("match", new GameServerWriteClient(match));
+    this.emit("match", this.clientBuilder.fromMatch(match));
   }
 
   private async pingRankServers(servers: string[]): Promise<string[]> {

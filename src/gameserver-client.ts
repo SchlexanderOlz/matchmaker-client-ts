@@ -31,6 +31,20 @@ export class GameServerReadClient extends EventEmitter {
   }
 }
 
+
+
+export interface GameServerClientBuilder<T> {
+    fromMatch(match: Match): T;
+}
+
+
+export class GameServerClientDefault implements GameServerClientBuilder<GameServerWriteClient> {
+    fromMatch(match: Match): GameServerWriteClient {
+        return new GameServerWriteClient(match);
+    }
+}
+
+
 export class GameServerWriteClient extends GameServerReadClient {
   protected readonly writeToken: string;
 
@@ -41,5 +55,9 @@ export class GameServerWriteClient extends GameServerReadClient {
     this.socket.on("connected", () => {
         this.socket.emit("auth", this.writeToken);
     });
+  }
+
+  static fromMatch(match: Match): GameServerWriteClient {
+    return new GameServerWriteClient(match);
   }
 }
