@@ -15,9 +15,12 @@ export interface GameMode {
 }
 
 export interface SearchInfo {
-  player_id: string;
   game: string;
   mode: GameMode;
+}
+
+export interface Search extends SearchInfo {
+  player_id: string;
 }
 
 export interface Match {
@@ -31,9 +34,16 @@ export class MatchMaker<C extends GameServerWriteClient> extends EventEmitter {
   private socket: Socket;
   private ready: boolean = false;
   private readonly clientBuilder: GameServerClientBuilder<C>;
+  private readonly userId: string;
 
-  constructor(url: string, clientBuilder?: GameServerClientBuilder<C>) {
+  constructor(
+    url: string,
+    userId: string,
+    clientBuilder?: GameServerClientBuilder<C>
+  ) {
     super();
+    this.userId = userId;
+
     this.url = url.at(-1) === "/" ? url.slice(0, -1) : url;
     this.socket = io(this.url + "/match", {
       autoConnect: true,
@@ -66,14 +76,16 @@ export class MatchMaker<C extends GameServerWriteClient> extends EventEmitter {
     while (!this.ready) {
       await sleep(100);
     }
+    let search: Search = { ...search_info, player_id: this.userId };
     this.socket.on("reject", this.onReject.bind(this));
     this.socket.on("servers", this.onServers.bind(this));
-    this.socket.emit("search", search_info);
+    this.socket.emit("search", search);
   }
 
   private async onServers(data: any) {
     const servers = data as string[];
-    const ranked = await this.pingRankServers(servers);
+    // const ranked = await this.pingRankServers(servers);
+    const ranked = data;
 
     this.socket.emit("servers", ranked);
     this.socket.on("match", this.onMatch.bind(this));
@@ -86,7 +98,7 @@ export class MatchMaker<C extends GameServerWriteClient> extends EventEmitter {
 
   private onMatch(data: any) {
     const match = data as Match;
-    this.emit("match", this.clientBuilder.fromMatch(match));
+    this.emit("match", this.clientBuilder.fromMatch(this.userId, match));
   }
 
   private async pingRankServers(servers: string[]): Promise<string[]> {

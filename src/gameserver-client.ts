@@ -9,8 +9,8 @@ export class GameServerReadClient extends EventEmitter {
 
   constructor(url: string, readToken: string) {
     super();
-    this.url = url.at(-1) === "/" ? url.slice(0, -1) : url;
     this.readToken = readToken;
+    this.url = "http://" + (url.at(-1) === "/" ? url.slice(0, -1) : url);
     this.socket = io(this.url + "/" + this.readToken, {
       autoConnect: true,
       reconnection: true,
@@ -34,30 +34,32 @@ export class GameServerReadClient extends EventEmitter {
 
 
 export interface GameServerClientBuilder<T> {
-    fromMatch(match: Match): T;
+    fromMatch(userId: string, match: Match): T;
 }
 
 
 export class GameServerClientDefault implements GameServerClientBuilder<GameServerWriteClient> {
-    fromMatch(match: Match): GameServerWriteClient {
-        return new GameServerWriteClient(match);
+    fromMatch(userId: string, match: Match): GameServerWriteClient {
+        return new GameServerWriteClient(userId, match);
     }
 }
 
 
 export class GameServerWriteClient extends GameServerReadClient {
   protected readonly writeToken: string;
+  protected readonly userId: string;
 
-  constructor(match: Match) {
+  constructor(userId: string, match: Match) {
     super(match.address, match.read);
+    this.userId = userId;
     this.writeToken = match.write;
 
-    this.socket.on("connected", () => {
+    this.socket.on("connect", () => {
         this.socket.emit("auth", this.writeToken);
     });
   }
 
-  static fromMatch(match: Match): GameServerWriteClient {
-    return new GameServerWriteClient(match);
+  static fromMatch(userId: string, match: Match): GameServerWriteClient {
+    return new GameServerWriteClient(userId, match);
   }
 }

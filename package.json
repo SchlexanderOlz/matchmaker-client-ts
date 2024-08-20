@@ -1,12 +1,16 @@
 {
-  "name": "matchmaker-client-ts",
+  "name": "gn-matchmaker-client",
+  "version": "0.1.7",
   "module": "index.ts",
   "type": "module",
   "scripts": {
-    "build": "tsc"
+    "build": "tsc",
+    "prepare": "cpy 'lib/**/*' .",
+    "postpublish": "rm -rf *.d.ts && rm -rf *.js"
   },
   "files": [
-    "lib/**/*"
+    "*.js",
+    "*.d.ts"
   ],
   "devDependencies": {
     "@types/bun": "latest"
@@ -16,6 +20,7 @@
   },
   "dependencies": {
     "@types/ping": "^0.4.4",
+    "cpy-cli": "^5.0.0",
     "events": "^3.3.0",
     "ping": "^0.4.4",
     "socket.io-client": "^4.7.5",
