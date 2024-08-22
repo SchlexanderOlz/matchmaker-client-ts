@@ -84,8 +84,7 @@ export class MatchMaker<C extends GameServerWriteClient> extends EventEmitter {
 
   private async onServers(data: any) {
     const servers = data as string[];
-    // const ranked = await this.pingRankServers(servers);
-    const ranked = data;
+    const ranked = await this.pingRankServers(servers);
 
     this.socket.emit("servers", ranked);
     this.socket.on("match", this.onMatch.bind(this));
@@ -102,9 +101,12 @@ export class MatchMaker<C extends GameServerWriteClient> extends EventEmitter {
   }
 
   private async pingRankServers(servers: string[]): Promise<string[]> {
-    const ping = servers.map((server) => MatchMaker.pingServer(server));
+    const ping = servers.map((server) => {
+      server = server.split(":")[0] || server;
+      return MatchMaker.pingServer(server);
+    });
 
-    return await Promise.all(ping).then((pings) =>
+    return Promise.all(ping).then((pings) =>
       servers
         .map((server, index) => {
           return { server, ping: pings[index] };
