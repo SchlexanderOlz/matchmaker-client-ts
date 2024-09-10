@@ -29,6 +29,12 @@ export interface Match {
   write: string;
 }
 
+interface MatchMakingEvents {
+  match: GameServerWriteClient;
+  reject: string;
+  _servers: string[];
+}
+
 export class MatchMaker<C extends GameServerWriteClient> extends EventEmitter {
   url: string;
   private socket: Socket;
@@ -71,6 +77,21 @@ export class MatchMaker<C extends GameServerWriteClient> extends EventEmitter {
       throw err;
     });
   }
+
+  public on<K extends keyof MatchMakingEvents>(
+    event: K,
+    listener: (payload: MatchMakingEvents[K]) => void
+  ): this {
+    return super.on(event, listener);
+  }
+
+  public emit<K extends keyof MatchMakingEvents>(
+    event: K,
+    payload?: MatchMakingEvents[K]
+  ): boolean {
+    return super.emit(event, payload);
+  }
+
 
   async search(search_info: SearchInfo) {
     while (!this.ready) {
