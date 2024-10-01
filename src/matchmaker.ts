@@ -55,6 +55,7 @@ export class MatchMaker<C extends GameServerWriteClient> extends EventEmitter {
       autoConnect: true,
       reconnection: true,
       forceNew: true,
+      transports: ["websocket", "polling"]
     });
 
     this.clientBuilder =

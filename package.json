@@ -1,6 +1,6 @@
 {
   "name": "gn-matchmaker-client",
-  "version": "0.1.9",
+  "version": "0.1.14",
   "module": "index.ts",
   "type": "module",
   "scripts": {

@@ -10,11 +10,12 @@ export class GameServerReadClient extends EventEmitter {
   constructor(url: string, readToken: string) {
     super();
     this.readToken = readToken;
-    this.url = "http://" + (url.at(-1) === "/" ? url.slice(0, -1) : url);
+    this.url = "https://" + (url.at(-1) === "/" ? url.slice(0, -1) : url);
     this.socket = io(this.url + "/" + this.readToken, {
       autoConnect: true,
       reconnection: true,
       forceNew: true,
+      transports: ["websocket", "polling"]
     });
 
     this.socket.on("connect_error", (err) => {
