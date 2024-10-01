@@ -1,4 +1,3 @@
-import { sleep } from "bun";
 import EventEmitter from "events";
 import { io, type Socket } from "socket.io-client";
 import * as ping from "ping";
@@ -93,10 +92,14 @@ export class MatchMaker<C extends GameServerWriteClient> extends EventEmitter {
     return super.emit(event, payload);
   }
 
+  static async wait(t: number) {
+    return new Promise((resolve) => setTimeout(resolve, t));
+  };
+
 
   async search(search_info: SearchInfo) {
     while (!this.ready) {
-      await sleep(100);
+      await MatchMaker.wait(100);
     }
     let search: Search = { ...search_info, player_id: this.userId };
     this.socket.on("reject", this.onReject.bind(this));
