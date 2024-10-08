@@ -1,7 +1,7 @@
 {
   "name": "gn-matchmaker-client",
-  "version": "0.1.15",
-  "module": "index.js",
+  "version": "0.1.19",
+  "exports": "./index.js",
   "type": "module",
   "scripts": {
     "build": "tsc",
@@ -22,8 +22,8 @@
     "@types/ping": "^0.4.4",
     "cpy-cli": "^5.0.0",
     "events": "^3.3.0",
-    "ping": "^0.4.4",
-    "socket.io-client": "^4.7.5",
-    "typescript": "^5.5.4"
+    "socket.io-client": "^4.8.0",
+    "typescript": "^5.0.0",
+    "web-pingjs": "^1.0.1"
   }
 }

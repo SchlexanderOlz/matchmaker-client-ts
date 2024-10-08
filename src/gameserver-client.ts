@@ -1,5 +1,5 @@
 import EventEmitter from "events";
-import type { Match } from "./matchmaker";
+import type { Match } from "./matchmaker.js";
 import { io, type Socket } from "socket.io-client";
 
 export class GameServerReadClient extends EventEmitter {

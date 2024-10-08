@@ -1,11 +1,12 @@
 import EventEmitter from "events";
 import { io, type Socket } from "socket.io-client";
-import * as ping from "ping";
+import ping from 'web-pingjs';
+
 import {
   GameServerClientDefault,
   GameServerWriteClient,
   type GameServerClientBuilder,
-} from "./gameserver-client";
+} from "./gameserver-client.js";
 
 export interface GameMode {
   name: string;
@@ -148,10 +149,10 @@ export class MatchMaker<C extends GameServerWriteClient> extends EventEmitter {
     return new Promise((resolve, reject) => {
       const start = Date.now();
 
-      const pingTime = ping.promise.probe(server).then((res) => {
-        if (res.alive) {
-          resolve(Date.now() - start);
-        }
+      const pingTime = ping(server).then(() => {
+        resolve(Date.now() - start);
+      }).catch(() => {
+        reject(new Error(`Ping ${server} failed`));
       });
 
       const timeoutPromise = new Promise((_, reject) => {
