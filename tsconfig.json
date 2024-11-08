@@ -5,9 +5,9 @@
     "module": "ESNext",
     "moduleDetection": "force",
     "jsx": "react-jsx",
-    "allowJs": true,
     "declaration": true,
-    "outDir": "./lib",  
+    "sourceMap": true,
+    "outDir": "./dist",  
     "rootDir": "./src",
 
     /* Bundler mode */

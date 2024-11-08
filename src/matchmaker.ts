@@ -15,6 +15,7 @@ export interface GameMode {
 }
 
 export interface SearchInfo {
+  region: string;
   game: string;
   mode: GameMode;
 }
@@ -78,17 +79,9 @@ export class MatchMaker<C extends GameServerWriteClient> extends EventEmitter {
     }
     let search: Search = { ...search_info, player_id: this.userId };
     this.socket.on("reject", this.onReject.bind(this));
-    this.socket.on("servers", this.onServers.bind(this));
-    this.socket.emit("search", search);
-  }
-
-  private async onServers(data: any) {
-    const servers = data as string[];
-    const ranked = await this.pingRankServers(servers);
-
-    this.socket.emit("servers", ranked);
     this.socket.on("match", this.onMatch.bind(this));
-    this.emit("_servers", ranked);
+
+    this.socket.emit("search", search);
   }
 
   private onReject(data: any) {
@@ -98,44 +91,5 @@ export class MatchMaker<C extends GameServerWriteClient> extends EventEmitter {
   private onMatch(data: any) {
     const match = data as Match;
     this.emit("match", this.clientBuilder.fromMatch(this.userId, match));
-  }
-
-  private async pingRankServers(servers: string[]): Promise<string[]> {
-    const ping = servers.map((server) => {
-      server = server.split(":")[0] || server;
-      return MatchMaker.pingServer(server);
-    });
-
-    return Promise.all(ping).then((pings) =>
-      servers
-        .map((server, index) => {
-          return { server, ping: pings[index] };
-        })
-        .sort((a, b) => a.ping - b.ping)
-        .map((server) => server.server)
-    );
-  }
-
-  private static async pingServer(
-    server: string,
-    timeout: number = 2000
-  ): Promise<number> {
-    return new Promise((resolve, reject) => {
-      const start = Date.now();
-
-      const pingTime = ping.promise.probe(server).then((res) => {
-        if (res.alive) {
-          resolve(Date.now() - start);
-        }
-      });
-
-      const timeoutPromise = new Promise((_, reject) => {
-        setTimeout(() => {
-          reject(new Error(`Ping ${server} timed out`));
-        }, timeout);
-      });
-
-      Promise.race([pingTime, timeoutPromise]).catch(reject);
-    });
   }
 }
