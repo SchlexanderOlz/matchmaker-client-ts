@@ -1,12 +1,12 @@
-import { sleep } from "bun";
 import EventEmitter from "events";
 import { io, type Socket } from "socket.io-client";
-import * as ping from "ping";
+import ping from 'web-pingjs';
+
 import {
   GameServerClientDefault,
   GameServerWriteClient,
   type GameServerClientBuilder,
-} from "./gameserver-client";
+} from "./gameserver-client.js";
 
 export interface GameMode {
   name: string;
@@ -30,6 +30,12 @@ export interface Match {
   write: string;
 }
 
+interface MatchMakingEvents {
+  match: GameServerWriteClient;
+  reject: string;
+  _servers: string[];
+}
+
 export class MatchMaker<C extends GameServerWriteClient> extends EventEmitter {
   url: string;
   private socket: Socket;
@@ -50,6 +56,7 @@ export class MatchMaker<C extends GameServerWriteClient> extends EventEmitter {
       autoConnect: true,
       reconnection: true,
       forceNew: true,
+      transports: ["websocket", "polling"]
     });
 
     this.clientBuilder =
@@ -73,9 +80,28 @@ export class MatchMaker<C extends GameServerWriteClient> extends EventEmitter {
     });
   }
 
+  public on<K extends keyof MatchMakingEvents>(
+    event: K,
+    listener: (payload: MatchMakingEvents[K]) => void
+  ): this {
+    return super.on(event, listener);
+  }
+
+  public emit<K extends keyof MatchMakingEvents>(
+    event: K,
+    payload?: MatchMakingEvents[K]
+  ): boolean {
+    return super.emit(event, payload);
+  }
+
+  static async wait(t: number) {
+    return new Promise((resolve) => setTimeout(resolve, t));
+  };
+
+
   async search(search_info: SearchInfo) {
     while (!this.ready) {
-      await sleep(100);
+      await MatchMaker.wait(100);
     }
     let search: Search = { ...search_info, player_id: this.userId };
     this.socket.on("reject", this.onReject.bind(this));
