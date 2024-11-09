@@ -1,6 +1,5 @@
 import EventEmitter from "events";
 import { io, type Socket } from "socket.io-client";
-import ping from 'web-pingjs';
 
 import {
   GameServerClientDefault,
