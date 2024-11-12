@@ -21,6 +21,7 @@ export interface SearchInfo {
 
 export interface Search extends SearchInfo {
   player_id: string;
+  session_token: string;
 }
 
 export interface Match {
@@ -41,14 +42,17 @@ export class MatchMaker<C extends GameServerWriteClient> extends EventEmitter {
   private ready: boolean = false;
   private readonly clientBuilder: GameServerClientBuilder<C>;
   private readonly userId: string;
+  private readonly sessionToken: string;
 
   constructor(
     url: string,
     userId: string,
+    sessionToken: string,
     clientBuilder?: GameServerClientBuilder<C>
   ) {
     super();
     this.userId = userId;
+    this.sessionToken = sessionToken;
 
     this.url = url.at(-1) === "/" ? url.slice(0, -1) : url;
     this.socket = io(this.url + "/match", {
@@ -102,7 +106,7 @@ export class MatchMaker<C extends GameServerWriteClient> extends EventEmitter {
     while (!this.ready) {
       await MatchMaker.wait(100);
     }
-    let search: Search = { ...search_info, player_id: this.userId };
+    let search: Search = { ...search_info, player_id: this.userId, session_token: this.sessionToken };
     this.socket.on("reject", this.onReject.bind(this));
     this.socket.on("match", this.onMatch.bind(this));
 
