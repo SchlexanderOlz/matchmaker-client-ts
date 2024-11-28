@@ -47,13 +47,15 @@ export class GameServerClientDefault implements GameServerClientBuilder<GameServ
 
 
 export class GameServerWriteClient extends GameServerReadClient {
-  protected readonly writeToken: string;
-  protected readonly userId: string;
+  public readonly writeToken: string;
+  public readonly userId: string;
+  public readonly opponents: string[] = [];
 
   constructor(userId: string, match: Match) {
     super(match.address, match.read);
     this.userId = userId;
     this.writeToken = match.write;
+    this.opponents = match.players.filter((player) => player !== userId);
 
     this.socket.on("connect", () => {
         this.socket.emit("auth", this.writeToken);

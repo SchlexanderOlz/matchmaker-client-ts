@@ -20,7 +20,6 @@ export interface SearchInfo {
 }
 
 export interface Search extends SearchInfo {
-  player_id: string;
   session_token: string;
 }
 
@@ -28,6 +27,7 @@ export interface Match {
   address: string;
   read: string;
   write: string;
+  players: string[];
 }
 
 interface MatchMakingEvents {
@@ -106,7 +106,7 @@ export class MatchMaker<C extends GameServerWriteClient> extends EventEmitter {
     while (!this.ready) {
       await MatchMaker.wait(100);
     }
-    let search: Search = { ...search_info, player_id: this.userId, session_token: this.sessionToken };
+    let search: Search = { ...search_info, session_token: this.sessionToken };
     this.socket.on("reject", this.onReject.bind(this));
     this.socket.on("match", this.onMatch.bind(this));
 
@@ -119,6 +119,6 @@ export class MatchMaker<C extends GameServerWriteClient> extends EventEmitter {
 
   private onMatch(data: any) {
     const match = data as Match;
-    this.emit("match", this.clientBuilder.fromMatch(this.userId, match));
+    this.emit("match", this.clientBuilder.fromMatch(match.write, match));
   }
 }
