@@ -6,6 +6,7 @@ export class GameServerReadClient extends EventEmitter {
   readonly url: string;
   protected readonly readToken: string;
   protected socket: Socket;
+  protected latestEvent: { timestamp: number } = { timestamp: 0 };
 
   constructor(url: string, readToken: string) {
     super();
@@ -22,6 +23,13 @@ export class GameServerReadClient extends EventEmitter {
       throw err;
     });
 
+    this.socket.onAny((event, ...args) => {
+      console.log(args)
+      if (args[0].timestamp) {
+        this.latestEvent = args[0]
+      }
+    })
+
     this.socket.on("connect_timeout", () => {
       throw new Error("Connection Timeout");
     });
@@ -29,6 +37,10 @@ export class GameServerReadClient extends EventEmitter {
     this.socket.on("error", (err) => {
       throw err;
     });
+  }
+
+  sync(timestamp?: number) {
+    this.socket.emit("sync", timestamp ? timestamp : this.latestEvent.timestamp);
   }
 }
 
