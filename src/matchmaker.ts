@@ -7,16 +7,12 @@ import {
   type GameServerClientBuilder,
 } from "./gameserver-client.js";
 
-export interface GameMode {
-  name: string;
-  player_count: number;
-  computer_lobby: boolean;
-}
 
 export interface SearchInfo {
   region: string;
   game: string;
-  mode: GameMode;
+  mode: string;
+  ai: boolean;
 }
 
 export interface Search extends SearchInfo {
@@ -119,6 +115,6 @@ export class MatchMaker<C extends GameServerWriteClient> extends EventEmitter {
 
   private onMatch(data: any) {
     const match = data as Match;
-    this.emit("match", this.clientBuilder.fromMatch(match.write, match));
+    this.emit("match", this.clientBuilder.fromMatch(this.userId, match));
   }
 }

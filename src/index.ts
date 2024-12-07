@@ -1,5 +1,5 @@
 export { MatchMaker } from "./matchmaker.js";
-export type { GameMode, SearchInfo, Match } from "./matchmaker.js";
+export type { SearchInfo, Match } from "./matchmaker.js";
 export {
   GameServerReadClient,
   GameServerWriteClient,
