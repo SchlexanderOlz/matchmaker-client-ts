@@ -7,12 +7,26 @@ import {
   type GameServerClientBuilder,
 } from "./gameserver-client.js";
 
-
 export interface SearchInfo {
   region: string;
   game: string;
   mode: string;
   ai: boolean;
+}
+
+export interface HostRequestInfo {
+  region: string;
+  game: string;
+  mode: string;
+  reserved_players: string[];
+}
+
+export interface HostRequest extends HostRequestInfo {
+  session_token: string;
+}
+
+export interface HostInfo {
+  host_id: string;
 }
 
 export interface Search extends SearchInfo {
@@ -30,6 +44,7 @@ interface MatchMakingEvents {
   match: GameServerWriteClient;
   reject: string;
   _servers: string[];
+  host_info: HostInfo;
 }
 
 export class MatchMaker<C extends GameServerWriteClient> extends EventEmitter {
@@ -55,7 +70,7 @@ export class MatchMaker<C extends GameServerWriteClient> extends EventEmitter {
       autoConnect: true,
       reconnection: true,
       forceNew: true,
-      transports: ["websocket", "polling"]
+      transports: ["websocket", "polling"],
     });
 
     this.clientBuilder =
@@ -72,6 +87,8 @@ export class MatchMaker<C extends GameServerWriteClient> extends EventEmitter {
 
     this.socket.on("connect", () => {
       this.ready = true;
+      this.socket.on("reject", this.onReject.bind(this));
+      this.socket.on("match", this.onMatch.bind(this));
     });
 
     this.socket.on("error", (err) => {
@@ -95,18 +112,42 @@ export class MatchMaker<C extends GameServerWriteClient> extends EventEmitter {
 
   static async wait(t: number) {
     return new Promise((resolve) => setTimeout(resolve, t));
-  };
-
+  }
 
   async search(search_info: SearchInfo) {
     while (!this.ready) {
       await MatchMaker.wait(100);
     }
     let search: Search = { ...search_info, session_token: this.sessionToken };
-    this.socket.on("reject", this.onReject.bind(this));
-    this.socket.on("match", this.onMatch.bind(this));
-
     this.socket.emit("search", search);
+  }
+
+  async host(host_info: HostRequestInfo): Promise<HostInfo> {
+    while (!this.ready) {
+      await MatchMaker.wait(100);
+    }
+    let host: HostRequest = { ...host_info, session_token: this.sessionToken };
+
+    this.socket.on("host_info", (info) => this.emit("host_info", info));
+
+    this.socket.emit("host", host);
+
+    return new Promise((resolve) => {
+      this.once("host_info", (info) => {
+        resolve(info);
+      });
+    })
+  }
+
+  async join(host_id: string) {
+    while (!this.ready) {
+      await MatchMaker.wait(100);
+    }
+
+    this.socket.emit("join", {
+      host_id: host_id,
+      session_token: this.sessionToken,
+    });
   }
 
   private onReject(data: any) {
