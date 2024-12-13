@@ -18,7 +18,7 @@ export interface HostRequestInfo {
   region: string;
   game: string;
   mode: string;
-  reserved_players: string[];
+  public: boolean;
 }
 
 export interface HostRequest extends HostRequestInfo {
@@ -139,7 +139,7 @@ export class MatchMaker<C extends GameServerWriteClient> extends EventEmitter {
     })
   }
 
-  async join(host_id: string) {
+  async join_pub(host_id: string) {
     while (!this.ready) {
       await MatchMaker.wait(100);
     }
@@ -148,6 +148,25 @@ export class MatchMaker<C extends GameServerWriteClient> extends EventEmitter {
       host_id: host_id,
       session_token: this.sessionToken,
     });
+  }
+
+  async join_priv(join_token: string) {
+    while (!this.ready) {
+      await MatchMaker.wait(100);
+    }
+
+    this.socket.emit("join", {
+      join_token: join_token,
+      session_token: this.sessionToken,
+    });
+  }
+
+  async join(host_id?: string, join_token?: string) {
+    if (host_id) {
+      this.join_pub(host_id);
+    } else if (join_token) {
+      this.join_priv(join_token);
+    }
   }
 
   private onReject(data: any) {

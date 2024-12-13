@@ -10,7 +10,7 @@ let instance = new MatchMaker(
 );
 
 
-instance.join(search_id)
+instance.join_priv(search_id)
 
 instance.on("match", (match) => {
     console.log(match)

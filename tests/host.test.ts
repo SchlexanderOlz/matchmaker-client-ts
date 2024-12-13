@@ -14,7 +14,7 @@ const info: HostRequestInfo = {
   region: "eu-central-1",
   game: "Schnapsen",
   mode: "duo",
-  reserved_players: []
+  public: false
 }
 
 let host_info = await instance.host(info)
