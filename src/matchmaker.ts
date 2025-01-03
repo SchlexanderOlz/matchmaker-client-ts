@@ -11,7 +11,7 @@ export interface SearchInfo {
   region: string;
   game: string;
   mode: string;
-  ai: boolean;
+  ai?: string;
 }
 
 export interface HostRequestInfo {
