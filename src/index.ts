@@ -4,4 +4,4 @@ export {
   GameServerReadClient,
   GameServerWriteClient,
 } from "./gameserver-client.js";
-export type { GameServerClientBuilder } from "./gameserver-client.js";
+export type { GameServerClientBuilder, GameServerWriteClientEvents } from "./gameserver-client.js";
