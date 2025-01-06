@@ -32,22 +32,21 @@ export class GameServerReadClient extends EventEmitter {
     });
 
     this.socket.on("connect_error", (err) => {
-      throw err;
+      this.emit("error", err);
     });
 
     this.socket.onAny((event, ...args) => {
-      console.log(args);
       if (args[0].timestamp) {
         this.latestEvent = args[0];
       }
     });
 
     this.socket.on("connect_timeout", () => {
-      throw new Error("Connection Timeout");
+      this.emit("error", new Error("Connection Timeout"));
     });
 
     this.socket.on("error", (err) => {
-      throw err;
+      this.emit("error", err);
     });
   }
 
@@ -76,6 +75,7 @@ export interface GameServerWriteClientEvents {
   timeout_in: number; 
   timeout: Timeout;
   cancel_timeout_threat: void;
+  error: Error;
 }
 
 export class GameServerWriteClient extends GameServerReadClient {
