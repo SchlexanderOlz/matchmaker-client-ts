@@ -12,6 +12,7 @@ export interface SearchInfo {
   game: string;
   mode: string;
   ai?: string;
+  allow_reconnect: boolean
 }
 
 export interface HostRequestInfo {
@@ -175,6 +176,11 @@ export class MatchMaker<C extends GameServerWriteClient> extends EventEmitter {
 
   private onMatch(data: any) {
     const match = data as Match;
+
+    if (match.address === undefined) {
+      console.log(match)
+      return;
+    }
     this.emit("match", this.clientBuilder.fromMatch(this.userId, match));
   }
 }

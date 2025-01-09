@@ -14,7 +14,7 @@ interface Timeout {
 
 export class GameServerReadClient extends EventEmitter {
   readonly url: string;
-  protected readonly readToken: string;
+  readonly readToken: string;
   protected socket: Socket;
   protected latestEvent: { timestamp: number } = { timestamp: 0 };
 

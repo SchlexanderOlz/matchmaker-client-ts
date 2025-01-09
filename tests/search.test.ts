@@ -4,7 +4,8 @@ const sessionToken = process.argv[2] ? process.argv[2] : "test";
 
 
 let instance = new MatchMaker(
-  "http://127.0.0.1:4000",
+  // "http://127.0.0.1:4000",
+  "https://matchmaking.jjhost.at",
   "saus" + Math.random(),
   sessionToken,
 );
@@ -12,12 +13,12 @@ let instance = new MatchMaker(
 const info: SearchInfo = {
     region: "eu-central-1",
     game: "Schnapsen",
-    mode: "duo",
+    mode: "speed",
+    ai: "*",
+    allow_reconnect: false
 }
 
-let search_info = await instance.search(info)
-
-console.log(search_info)
+await instance.search(info)
 
 instance.on("match", (match) => {
     console.log(match)
