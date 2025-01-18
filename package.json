@@ -1,6 +1,6 @@
 {
   "name": "gn-matchmaker-client",
-  "version": "0.1.47",
+  "version": "0.1.48",
   "exports": "./index.js",
   "type": "module",
   "scripts": {

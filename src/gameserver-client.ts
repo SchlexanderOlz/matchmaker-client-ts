@@ -15,12 +15,16 @@ interface Timeout {
 export class GameServerReadClient extends EventEmitter {
   readonly url: string;
   readonly readToken: string;
+  readonly game: string;
+  readonly mode: string;
   protected socket: Socket;
   protected latestEvent: { timestamp: number } = { timestamp: 0 };
 
-  constructor(url: string, readToken: string) {
+  constructor(url: string, readToken: string, game: string, mode: string) {
     super();
     this.readToken = readToken;
+    this.game = game;
+    this.mode = mode;
     this.url = url.match(/^https?:\/\//)
       ? url
       : "https://" + (url.at(-1) === "/" ? url.slice(0, -1) : url);
@@ -98,7 +102,7 @@ export class GameServerWriteClient extends GameServerReadClient {
   }
 
   constructor(userId: string, match: Match) {
-    super(match.address, match.read);
+    super(match.address, match.read, match.game, match.mode);
     this.userId = userId;
     this.writeToken = match.write;
     this.opponents = match.players.filter((player) => player !== userId);
