@@ -39,6 +39,8 @@ export interface Match {
   read: string;
   write: string;
   players: string[];
+  game: string;
+  mode: string;
 }
 
 interface MatchMakingEvents {
