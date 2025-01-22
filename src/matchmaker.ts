@@ -142,6 +142,10 @@ export class MatchMaker<C extends GameServerWriteClient> extends EventEmitter {
     })
   }
 
+  stop_search() {
+    this.socket.emit("stop_search")
+  }
+
   async join_pub(host_id: string) {
     while (!this.ready) {
       await MatchMaker.wait(100);
