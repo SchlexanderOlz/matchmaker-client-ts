@@ -40,7 +40,7 @@ export class GameServerReadClient extends EventEmitter {
     });
 
     this.socket.onAny((event, ...args) => {
-      if (args[0].timestamp) {
+      if (args && args[0].timestamp) {
         this.latestEvent = args[0];
       }
     });
